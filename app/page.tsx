@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Upload, Button, Table, Select } from "antd";
+import {Upload, Button, Table, Select, Modal} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import * as XLSX from "xlsx";
 import { calculateGPA, calculateFinalGPA } from "@/utils/gpaCalculator";
 import { cols } from "@/public/columns";
 import ReportTemplate from "@/app/components/ReportTemplate";
+import ReportModal from "@/app/components/ReportModal";
 
 const { Option } = Select;
 
@@ -23,6 +24,7 @@ const HomePage: React.FC = () => {
   const [uploadCols, setUploadCols] = useState<string[]>([]);
   const [uploadData, setUploadData] = useState<never[]>([]);
   const [mappedFields, setMappedFields] = useState<Record<string, string>>({});
+  const [reportModal, setReportModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string | undefined>(
     undefined,
   );
@@ -114,26 +116,9 @@ const HomePage: React.FC = () => {
   };
 
   const handleDownload = () => {
-    const processedData = data.map((row) => {
-      const mappedRow: Record<string, never> = {};
-      Object.entries(mappedFields).forEach(([csvField, mappedField]) => {
-        mappedRow[mappedField] = row[csvField];
-      });
-
-      if (mappedRow.marks && mappedRow.subjects) {
-        mappedRow.GPA = calculateGPA(mappedRow.marks) as never;
-      }
-
-      return mappedRow;
-    });
-
-    const finalGPA = calculateFinalGPA(processedData);
-    const finalData = [...processedData, { "Final GPA": finalGPA }];
-    console.log(finalData);
-    // const worksheet = XLSX.utils.json_to_sheet(finalData);
-    // const workbook = XLSX.utils.book_new();
-    // XLSX.utils.book_append_sheet(workbook, worksheet, "Report Card");
-    // XLSX.writeFile(workbook, "report_card.xlsx");
+    
+    setReportModal(true);
+    console.log(data[0]);
   };
 
   return (
@@ -176,7 +161,7 @@ const HomePage: React.FC = () => {
           <Button icon={<UploadOutlined />}>Upload CSV File</Button>
         </Upload>
         <Button type="primary" onClick={handleDownload}>
-          Download Report Card
+          View Report Card
         </Button>
       </div>
 
@@ -206,7 +191,7 @@ const HomePage: React.FC = () => {
           </div>
         ))}
       </div>
-      <ReportTemplate />
+      <ReportModal reportModal={reportModal} setReportModal={setReportModal} data={data} selectedClass={selectedClass}/>
     </div>
   );
 };

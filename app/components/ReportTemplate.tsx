@@ -1,11 +1,11 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { Card, Table, Typography } from "antd";
 import "tailwindcss/tailwind.css";
 
 const { Title, Text } = Typography;
 
 // Mock Data Example
-const studentInfo = {
+const demoStudent = {
   name: "MD. HASIB ASKARI",
   _class: "9",
   roll: "138378",
@@ -14,24 +14,15 @@ const studentInfo = {
   gender: "Male",
   result: "GPA=5.00",
 };
-
-const subjectData = [
-  { key: "1", code: "101", name: "BANGLA", grade: "A+" },
-  { key: "2", code: "107", name: "ENGLISH", grade: "A+" },
-  { key: "3", code: "109", name: "MATHEMATICS", grade: "A+" },
-  { key: "4", code: "150", name: "BANGLADESH AND GLOBAL STUDIES", grade: "A+" },
-  { key: "5", code: "111", name: "ISLAM AND MORAL EDUCATION", grade: "A+" },
-  { key: "6", code: "136", name: "PHYSICS", grade: "A+" },
-  { key: "7", code: "137", name: "CHEMISTRY", grade: "A+" },
-  { key: "8", code: "126", name: "HIGHER MATHEMATICS", grade: "A+" },
-  {
-    key: "9",
-    code: "154",
-    name: "INFORMATION AND COMMUNICATION TECHNOLOGY",
-    grade: "A+",
-  },
-  { key: "10", code: "138", name: "BIOLOGY", grade: "A+" },
-];
+type IStudent = {
+  name: string;
+  _class: string;
+  roll: string;
+  section: string;
+  result: string;
+  group?: string;
+  gender?: string;
+}
 
 const continuousData = [
   {
@@ -46,10 +37,48 @@ const continuousData = [
 const columns = [
   { title: "Subject Code", dataIndex: "code", key: "code", align: "center" },
   { title: "Subject Name", dataIndex: "name", key: "name" },
+  { title: "Marks", dataIndex: "marks", key: "marks", align: "center" },
   { title: "Grade", dataIndex: "grade", key: "grade", align: "center" },
 ];
 
-const ReportCard: React.FC = () => {
+const ReportCard: React.FC = ({row, selectedClass, key}: {row: any, selectedClass: string, key: number}) => {
+  // @ts-ignore
+  // @ts-ignore
+  const [studentInfo, setStudentInfo] = React.useState(demoStudent);
+  const [subjects, setSubjects] = React.useState([]);
+  const [continuousAssessment, setContinuousAssessment] = React.useState(false);
+  useEffect(() => {
+    const student: IStudent = {
+      name: row.studentName,
+      _class: row._class,
+      roll:row.roll,
+      section:row.section,
+      result: row.result,
+    } ;
+    setStudentInfo(student);
+    
+    const keysToRemove = ["roll", "section", "studentName", "undefined"];
+    
+    const filteredObject = Object.fromEntries(
+        Object.entries(row).filter(([key]) => !keysToRemove.includes(key))
+    );
+    
+    const convertedData = Object.entries(filteredObject)
+        .filter(([key, value]) => typeof value === "number") // Keep only numeric fields
+        .map(([key, value], index) => ({
+          key: (index + 1).toString(),
+          code: 'demoCodeGenerate', // Generate a sample code dynamically
+          name: key.toUpperCase(), // Convert names to uppercase
+          marks: value, // Add marks from the input object
+          grade: value >= 25 ? "A+" : "A", // Set grade based on value (example logic)
+        }));
+    
+    setSubjects(convertedData);
+    console.log(subjects);
+    
+    
+  }, []);
+  
   return (
     <div className="w-[210mm] h-[297mm] m-auto p-6 bg-white border shadow-lg">
       {/* Student Information Summary */}
@@ -59,11 +88,11 @@ const ReportCard: React.FC = () => {
         </Title>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <Text>Name of Student: {studentInfo.name}</Text>
-          <Text>Class: {studentInfo._class}</Text>
+          <Text>Class: {selectedClass}</Text>
           <Text>Section: {studentInfo.section}</Text>
           <Text>Roll No: {studentInfo.roll}</Text>
-          <Text>Group: {studentInfo.group}</Text>
-          <Text>Gender: {studentInfo.gender}</Text>
+          {studentInfo.group &&  <Text>Group: {studentInfo.group}</Text>}
+          {studentInfo.gender && <Text>Gender: {studentInfo.gender}</Text>}
           <Text>Result: {studentInfo.result}</Text>
         </div>
       </Card>
@@ -74,7 +103,7 @@ const ReportCard: React.FC = () => {
           Subject-wise Grade/Marks
         </Title>
         <Table
-          dataSource={subjectData}
+          dataSource={subjects}
           columns={columns}
           pagination={false}
           bordered
@@ -83,18 +112,18 @@ const ReportCard: React.FC = () => {
       </Card>
 
       {/* Subject-Wise Grade/Marks for Continuous Assessment */}
-      <Card>
+      {continuousAssessment && <Card>
         <Title level={4} className="text-center mb-4 text-green-600">
           Subject-Wise Grade/Marks for Continuous Assessment
         </Title>
         <Table
-          dataSource={continuousData}
-          columns={columns}
-          pagination={false}
-          bordered
-          size="small"
+            dataSource={continuousData}
+            columns={columns}
+            pagination={false}
+            bordered
+            size="small"
         />
-      </Card>
+      </Card>}
     </div>
   );
 };
