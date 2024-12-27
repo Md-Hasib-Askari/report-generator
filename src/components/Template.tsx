@@ -1,4 +1,4 @@
-import {Page, Text, View, Document, StyleSheet, PDFViewer} from "@react-pdf/renderer";
+import {Page, Image, Text, View, Document, StyleSheet, PDFViewer} from "@react-pdf/renderer";
 
 // Create styles
 const styles = StyleSheet.create({
@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
     },
     bold: {
         fontWeight: 600,
+        fontFamily: "Helvetica-Bold",
     },
     button: {
         marginTop: 20,
@@ -95,15 +96,47 @@ const StudentResultDocument = ({data, selectedClass}: {data: never | {
         <Page size="A4" style={styles.page}>
             {/* Intro */}
             <View style={{
-                ...styles.section,
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                flexDirection: "row",
                 justifyContent: "center",
-                gap: 8,
+                alignItems: "center",
+                padding: 20,
+                position: "relative",
             }}>
-                <Text style={{}}>Rasulpur High School</Text>
-                <Text style={{fontSize: 9}}>Panchabati, Narsingdi Sadar, Narsingdi</Text>
+                <View style={{
+                    position: "absolute",
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    flexDirection: "row",
+                    marginLeft: 20
+                }}>
+                    <Image src="" source={{
+                        uri: "/img.png"
+                    }} style={{
+                        width: 80,
+                        height: 80,
+                    }} fixed />
+                </View>
+
+                <View style={{
+                    // ...styles.section,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                }}>
+                    <Text style={{
+                        fontSize: 25,
+                        color: "green",
+                        fontWeight: "bold",
+                        fontFamily: "Times-Bold"
+                    }}>Rasulpur High School</Text>
+                    <Text style={{fontSize: 9}}>Panchabati, Narsingdi Sadar, Narsingdi</Text>
+                    <Text style={{fontSize: 18}}>Resultsheet of Annual Examination 2024</Text>
+
+                </View>
             </View>
 
             {/* Student Information Summary */}
@@ -144,49 +177,97 @@ const StudentResultDocument = ({data, selectedClass}: {data: never | {
                         </Text>
                         <Text style={{
                             ...styles.cell,
-                            textAlign: "center"
+                            textAlign: "center",
+                            fontFamily: "Helvetica-Bold"
                         }}>
                             <Text style={styles.bold}>Marks</Text>
                         </Text>
                     </View>
                     {
                         Object.keys(data).filter(x => !["roll", "studentName", "section", "group"].includes(x)).map(
-                            subject => (
-                                <View style={styles.row} key={subject}>
-                                    <Text style={{
-                                        ...styles.cell,
-                                        marginLeft: 20
-                                    }}>
-                                        {
-                                            subject === "Life & Livelyhood" ? "Life & Livelihood" :
-                                            subject === "grand" ? "Total" :
-                                                subject
-                                        }
-                                    </Text>
-                                    <Text style={{
-                                        ...styles.cell,
-                                        textAlign: "center"
-                                    }}>{data[subject]}</Text>
-                                </View>
-                            )
+                            subject => {
+                                if (subject.toLowerCase().includes("grand")) {
+                                    return (
+                                        <View style={{
+                                            ...styles.row,
+                                            fontFamily: "Helvetica-Bold"
+                                        }} key={subject}>
+                                            <Text style={{
+                                                ...styles.cell,
+                                                marginLeft: 20
+                                            }}>
+                                                {
+                                                    subject === "Life & Livelyhood" ? "Life & Livelihood" :
+                                                        subject === "grand" ? "Total" :
+                                                            subject
+                                                }
+                                            </Text>
+                                            <Text style={{
+                                                ...styles.cell,
+                                                textAlign: "center"
+                                            }}>{data[subject]}</Text>
+                                        </View>
+                                    )
+                                }
+                                return (
+                                    <View style={styles.row} key={subject}>
+                                        <Text style={{
+                                            ...styles.cell,
+                                            marginLeft: 20
+                                        }}>
+                                            {
+                                                subject === "Life & Livelyhood" ? "Life & Livelihood" :
+                                                    subject === "grand" ? "Total" :
+                                                        subject
+                                            }
+                                        </Text>
+                                        <Text style={{
+                                            ...styles.cell,
+                                            textAlign: "center"
+                                        }}>{data[subject]}</Text>
+                                    </View>
+                                )
+                            }
                         )
                     }
                 </View>
             </View>
+
+            {/* Status */}
+            <View style={{
+                fontSize: 12,
+                fontFamily: "Helvetica-Bold",
+            }}>
+                <Text>Result Summary: {" "}
+                    <Text style={{
+                    }}>
+                        <Text style={{
+                        }}>
+                            Passed
+                        </Text>
+                        {" / "}
+                        <Text style={{
+                        }}>
+                            Failed
+                        </Text>
+                    </Text>
+                </Text>
+            </View>
+
 
             {/* Signature */}
             <View style={{
                 marginTop: 100
             }}>
                 <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", fontSize: 12 }}>
-                    <View style={{ display: "flex", flexDirection: "column" }}>
-                        <Text style={{ textAlign: "center" }}>Signature of Parent</Text>
+                    <View style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                        <Text style={{ textAlign: "center" }}>Verified By</Text>
                     </View>
-                    <View style={{ display: "flex", flexDirection: "column" }}>
+                    <View style={{  flex: 1, display: "flex", flexDirection: "column" }}>
                         <Text style={{ textAlign: "center" }}>Signature of Class Teacher</Text>
                     </View>
-                    <View style={{ display: "flex", flexDirection: "column" }}>
-                        <Text style={{ textAlign: "center" }}>Signature of Principal</Text>
+                    <View style={{  flex: 1, display: "flex", flexDirection: "column" }}>
+                        <Text style={{ textAlign: "center" }}>Signature of Headmaster</Text>
                     </View>
                 </View>
             </View>
@@ -204,18 +285,21 @@ const StudentResultPDF = ({data, selectedClass}: {data: {
     return (
         <div>
             {
-                !data?.studentName ?
-                <h1 className="text-2xl font-bold text-center">No Data Found</h1> :
-                    <PDFViewer style={{
+                data?.studentName ? (<PDFViewer style={{
                         width: "100%",
                         height: "90vh"
                     }}
-
                     >
                         <StudentResultDocument data={data} selectedClass={selectedClass} />
-                    </PDFViewer>
-            }
+                    </PDFViewer>) :
+                <h1 className="text-2xl font-bold text-center">No Data Found</h1>
 
+            }
+            {/*<PDFDownloadLink document={<StudentResultDocument data={data} selectedClass={selectedClass} />} fileName="somename.pdf">*/}
+            {/*    {({ blob, url, loading, error }) =>*/}
+            {/*        <div>{loading ? 'Loading document...' : 'Download now!'}</div>*/}
+            {/*    }*/}
+            {/*</PDFDownloadLink>*/}
         </div>
     );
 }
